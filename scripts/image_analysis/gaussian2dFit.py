@@ -187,3 +187,27 @@ def guessNfitGaussian2d(im : np.ndarray, DEBUG : bool = False, flag_p : bool = T
         plot_fit_result(im, newp)
         plt.title('Fit result zoomed out')
     return newp
+
+from scipy.ndimage.interpolation import zoom
+def projection_axis_bar(S:np.ndarray, rebin: int = 10, title: str = None):
+    """Plot image and bar chart with projection on each axes
+    S : image array
+    rebin: step in the barcharts"""
+
+    grid = plt.GridSpec(4,4, hspace=0.3, wspace=0.3)
+    fig = plt.figure(figsize=(10,10))
+    main_ax = fig.add_subplot(grid[:-1,1:])
+    y_hist = fig.add_subplot(grid[:-1,0], sharey=main_ax )
+    x_hist = fig.add_subplot(grid[-1,1:], yticklabels=[], sharex=main_ax)
+
+    main_ax.imshow(S)
+    if title != None: main_ax.set_title(title)
+    # x_hist.hist(S[:,0], 40, histtype='stepfilled', orientation='vertical')
+    xbardata = zoom(S.sum(axis=0), 1/rebin)
+    x_hist.bar(np.linspace(0, len(S.sum(axis=0)), len(xbardata)), xbardata, width=8*rebin)
+    x_hist.invert_yaxis()
+
+    ybardata = zoom(S.sum(axis=1), 1/rebin)
+    y_hist.barh(np.linspace(0, len(S.sum(axis=1)), len(ybardata)), ybardata, height=8*rebin)
+    y_hist.invert_xaxis()
+    return xbardata, ybardata
